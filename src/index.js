@@ -8,46 +8,54 @@ const refs = {
 }
 
 class CountdownTimer {
-  constructor({ selector, targetDate }) {
+  constructor({ selector, targetDate, onTick }) {
     this.selector = selector;
     this.targetDate = targetDate;
+    this.onTick = onTick;
+
+    this.init();
+  }
+
+  init() {
+    const time = this.getTimeComponents(0);
+    this.onTick(time);
   }
 
     start() {
     setInterval(() => {
     const currentTime = Date.now();
     const targetDate = new Date();
-    const DeltaTime = this.targetDate - currentTime;
+    const deltaTime = this.targetDate - currentTime;
       
-      const { days, hours, mins, secs } = getTimeComponents(DeltaTime);
+    const time = this.getTimeComponents(deltaTime);
       
-      updateClockFace({ days, hours, mins, secs });
+      this.onTick(time);
     
-      console.log(`${days}:${hours}:${mins}:${secs}`);
   }, 1000);
   } 
+
+  getTimeComponents(time) {
+  const days = this.pad(Math.floor(time / (1000 * 60 * 60 * 24)));
+  const hours = this.pad(Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+  const mins = this.pad(Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)));
+  const secs = this.pad(Math.floor((time % (1000 * 60)) / 1000));
+
+  return { days, hours, mins, secs };
+  }
+  
+  pad(value) {
+    return String(value).padStart(2, '0');
+  }
+
   }
 
 const timer = new CountdownTimer({
   selector: '#timer-1',
   targetDate: new Date('May 14, 2021'),
+  onTick: updateClockFace,
 });
 
 timer.start();
-
-function pad(value) {
-  return String(value).padStart(2, '0');
-}
-
-
-function getTimeComponents(time) {
-  const days = pad(Math.floor(time / (1000 * 60 * 60 * 24)));
-  const hours = pad(Math.floor((time % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
-  const mins = pad(Math.floor((time % (1000 * 60 * 60)) / (1000 * 60)));
-  const secs = pad(Math.floor((time % (1000 * 60)) / 1000));
-
-  return { days, hours, mins, secs };
-}
 
 
 function updateClockFace({ days, hours, mins, secs }) {
